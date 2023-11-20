@@ -1,0 +1,125 @@
+{
+  "allowed_origin": [
+    "*"
+  ],
+  "max_age_in_seconds": 60,
+  "scoring_profiles": [],
+  "suggester": [
+    {
+      "name": "sg",
+      "source_fields": [
+        "Tags",
+        "Address/City",
+        "Address/Country"
+      ]
+    }
+  ],
+  "fields": [
+    {
+      "field_type": "SimpleField",
+      "name": "HotelId",
+      "type": "string",
+      "key": true
+    },
+    {
+      "field_type": "SearchableField",
+      "name": "HotelName",
+      "type": "string",
+      "sortable": true
+    },
+    {
+      "field_type": "SearchableField",
+      "name": "Description",
+      "type": "string",
+      "analyzer_name": "en.lucene"
+    },
+    {
+      "field_type": "SearchableField",
+      "name": "Description_fr",
+      "type": "string",
+      "analyzer_name": "fr.lucene"
+    },
+    {
+      "field_type": "SearchableField",
+      "name": "Category",
+      "type": "string",
+      "facetable": true,
+      "filterable": true,
+      "sortable": true
+    },
+    {
+      "field_type": "SearchableField",
+      "name": "Tags",
+      "collection": true,
+      "type": "string",
+      "facetable": true,
+      "filterable": true
+    },
+    {
+      "field_type": "SimpleField",
+      "name": "ParkingIncluded",
+      "type": "boolean",
+      "facetable": true,
+      "filterable": true,
+      "sortable": true
+    },
+    {
+      "field_type": "SimpleField",
+      "name": "LastRenovationDate",
+      "type": "datetime_offset",
+      "facetable": true,
+      "filterable": true,
+      "sortable": true
+    },
+    {
+      "field_type": "SimpleField",
+      "name": "Rating",
+      "type": "double",
+      "facetable": true,
+      "filterable": true,
+      "sortable": true
+    },
+    {
+      "field_type": "ComplexField",
+      "name": "Address",
+      "fields": [
+        {
+          "field_type": "SearchableField",
+          "name": "StreetAddress",
+          "type": "string"
+        },
+        {
+          "field_type": "SearchableField",
+          "name": "City",
+          "type": "string",
+          "facetable": true,
+          "filterable": true,
+          "sortable": true
+        },
+        {
+          "field_type": "SearchableField",
+          "name": "StateProvince",
+          "type": "string",
+          "facetable": true,
+          "filterable": true,
+          "sortable": true
+        },
+        {
+          "field_type": "SearchableField",
+          "name": "PostalCode",
+          "type": "string",
+          "facetable": true,
+          "filterable": true,
+          "sortable": true
+        },
+        {
+          "field_type": "SearchableField",
+          "name": "Country",
+          "type": "string",
+          "facetable": true,
+          "filterable": true,
+          "sortable": true
+        }
+      ]
+    }
+  ]}
