@@ -1,4 +1,3 @@
-import json
 from time import sleep
 
 from models.azure_search_client import AzureSearchClient

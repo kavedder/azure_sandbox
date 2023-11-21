@@ -13,5 +13,4 @@ Set up a virtual environment if you'd like (you should like).
 ```
 pip install -r requirements.txt
 ```
-(Currently this only includes requirements for Azure Search and other libs for running models
-and scripts, not for running the Jupyter notebook).
+(Includes requirements for Azure APIs and other stuff, as well as Jupyter notebook)

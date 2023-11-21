@@ -1,0 +1,106 @@
+{
+  "allowed_origin": [
+    "*"
+  ],
+  "max_age_in_seconds": 60,
+  "scoring_profiles": [],
+  "suggesters": [
+    {
+      "name": "sg",
+      "source_fields": [
+        "ToEmail",
+        "FromEmail",
+        "Username"
+      ]
+    }
+  ],
+  "fields": [
+    {
+      "field_type": "SimpleField",
+      "name": "MessageId",
+      "type": "string",
+      "key": true
+    },
+    {
+      "field_type": "SimpleField",
+      "name": "SendDate",
+      "type": "datetime_offset",
+      "facetable": true,
+      "filterable": true,
+      "sortable": true
+    },
+    {
+      "field_type": "SearchableField",
+      "name": "Username",
+      "type": "string",
+      "sortable": true,
+      "facetable": true,
+      "filterable": true
+    },
+    {
+      "field_type": "SearchableField",
+      "name": "Folder",
+      "type": "string",
+      "sortable": true,
+      "facetable": true,
+      "filterable": true
+    },
+    {
+      "field_type": "SearchableField",
+      "name": "FromEmail",
+      "type": "string",
+      "sortable": true,
+      "facetable": true,
+      "filterable": true
+    },
+    {
+      "field_type": "SearchableField",
+      "name": "ToEmail",
+      "type": "string",
+      "collection": true,
+      "facetable": true,
+      "filterable": true
+    },
+    {
+      "field_type": "SearchableField",
+      "name": "CcEmail",
+      "type": "string",
+      "collection": true,
+      "facetable": true,
+      "filterable": true
+    },
+    {
+      "field_type": "SearchableField",
+      "name": "BccEmail",
+      "type": "string",
+      "collection": true,
+      "facetable": true,
+      "filterable": true
+    },
+    {
+      "field_type": "SearchableField",
+      "name": "Subject",
+      "type": "string",
+      "analyzer_name": "en.lucene"
+    },
+    {
+      "field_type": "SearchableField",
+      "name": "Body",
+      "type": "string",
+      "analyzer_name": "en.lucene"
+    },
+    {
+      "field_type": "SearchableField",
+      "name": "FullBody",
+      "type": "string",
+      "analyzer_name": "en.lucene"
+    },
+    {
+      "field_type": "SimpleField",
+      "name": "IsDeleted",
+      "type": "boolean",
+      "sortable": true,
+      "facetable": true,
+      "filterable": true
+    }
+  ]}
