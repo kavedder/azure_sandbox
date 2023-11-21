@@ -33,7 +33,7 @@ def extract_tarball(fipath, outdir=None):
 def sub_header_line(sub_s, line, split=False):
     stripped = re.sub(rf'{sub_s}: *', '', line).strip()
     if split:
-        split_items = [e.strip() for e in stripped.split(',')]
+        split_items = [e.strip() for e in stripped.split(',') if e.strip()]
         return split_items
     return stripped
 
@@ -43,28 +43,34 @@ def sub_header_line(sub_s, line, split=False):
 def parse_email(raw, username, folder, path):
     is_deleted = 'deleted' in folder.lower()
     doc = {'Username': username, 'Folder': folder, 'IsDeleted': is_deleted, '@search.action': 'upload'}
-    full_body = []
-    simple_body = []
+    thread = []
+    body = []
     begin_body = False
     begin_thread = False
     for line in raw:
         if not line.strip():
             # the first blank newline signals we've entered the body
             begin_body = True
+            continue
         elif line.strip().startswith('----'):
             # a line surrounded by ---- indicates we're in the trailing thread, eg. fwd/reply
+            # don't `continue` because the info in the --- line might be helpful
             begin_thread = True
 
         if begin_body:
-            if not begin_thread:
-                simple_body.append(line.rstrip())
-            full_body.append(line.rstrip())
+            if begin_thread:
+                thread.append(line.rstrip())
+            else:
+                body.append(line.rstrip())
 
         else:
             # still in the header
             if line.startswith('Message-ID:'):
-                message_id = re.search(r'Message-ID: *<([^>]*)>', line).group(1)
+                original_message_id = re.search(r'Message-ID: *<([^>]*)>', line).group(1)
+                # keys can only contain a-zA-Z0-9_-=
+                message_id = re.sub(r'[^a-zA-Z0-9_\-=]+', '-', original_message_id)
                 doc['MessageId'] = message_id
+                doc['OriginalMessageId'] = original_message_id
             elif line.startswith('Date:'):
                 date = sub_header_line('Date', line)
                 date = re.sub(r'\(\w\wT\)', '', date).strip()  # dateparser doesn't like eg. (PST)
@@ -86,8 +92,8 @@ def parse_email(raw, username, folder, path):
             elif line.startswith('Subject: '):
                 doc['Subject'] = sub_header_line('Subject', line)
 
-    doc['Body'] = '\n'.join(simple_body)
-    doc['FullBody'] = '\n'.join(full_body)
+    doc['Body'] = '\n'.join(body)
+    doc['Thread'] = '\n'.join(thread)
 
     return doc
 
@@ -96,6 +102,8 @@ def walk_emails(email_dir):
     docs = []
     root = os.path.join(email_dir, 'maildir')
     last_user = None
+    user_count = 0
+    num_users = len(os.listdir(root))
     try:
         # assumes all email files end in `.` eg. /path/to/file/13.
         for fi in glob.iglob(f'{root}/**/*.', recursive=True):
@@ -104,7 +112,10 @@ def walk_emails(email_dir):
             username = pathdirs[base_idx + 1]
             folder = '/'.join(pathdirs[base_idx + 2:-1])
             if username != last_user:
-                print(f'Processing emails for {username}')
+                # print(f'Processing emails for {username}')
+                user_count += 1
+                if user_count % 10 == 0:
+                    print(f'User {user_count}/{num_users}...')
                 last_user = username
             with open(fi) as infi:
                 try:

@@ -1,6 +1,12 @@
 # 🤫 secretssss
 creds.*
 
+# too big!
+documents/enron.json
+
+# osx
+.DS_Store
+
 # editor
 .idea/
 

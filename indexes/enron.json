@@ -23,6 +23,11 @@
     },
     {
       "field_type": "SimpleField",
+      "name": "OriginalMessageId",
+      "type": "string"
+    },
+    {
+      "field_type": "SimpleField",
       "name": "SendDate",
       "type": "datetime_offset",
       "facetable": true,
@@ -91,7 +96,7 @@
     },
     {
       "field_type": "SearchableField",
-      "name": "FullBody",
+      "name": "Thread",
       "type": "string",
       "analyzer_name": "en.lucene"
     },

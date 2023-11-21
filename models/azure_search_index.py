@@ -63,10 +63,10 @@ def get_field_names(json_fields, prefix='', sep='/', only_highlightable=False):
 
 
 class AzureSearchIndex:
-    def __init__(self, index_name):
+    def __init__(self, index_name, index_file=None):
         self.index_name = index_name
 
-        index_file = os.path.join(BASE, 'indexes', f'{self.index_name}.json')
+        index_file = index_file or os.path.join(BASE, 'indexes', f'{self.index_name}.json')
         with open(index_file) as infi:
             self.index_json = json.load(infi)
 
