@@ -8,15 +8,22 @@ from azure.search.documents.indexes import SearchIndexClient
 
 from models.azure_search_index import AzureSearchIndex
 
-BASE = os.path.dirname(os.path.join('..', os.path.realpath(__file__)))
+BASE = os.path.dirname(os.path.join('..', os.path.dirname(os.path.realpath(__file__))))
 VALID_ENVS = ['dev']
 
 
 class AzureSearchClient:
+    """
+    Class that holds both an indexing client (build and delete indexes)
+    and search client (search/autocomplete/etc).
+
+    Tied to a single index.
+    """
     def __init__(self, index_name, env='dev'):
         assert env in VALID_ENVS, f'{env} is not a valid env; valid envs are {VALID_ENVS}'
 
         self.index_name = index_name
+
         self.creds_file = os.path.join(BASE, f'creds.{env}.yml')
         creds = self.get_creds()
         self.service_name = creds['service_name']
@@ -44,22 +51,29 @@ class AzureSearchClient:
         self.admin_client.delete_index(self.index_name)
         print(f'Index {self.index_name} Deleted')
 
+    def get_document_count(self):
+        return self.search_client.get_document_count()
+
     def create_index(self):
-        result = self.admin_client.create_index(self.index)
+        result = self.admin_client.create_index(self.index.index)
         print(f'Index {result.name} created')
 
     # TODO: does this need error handling? The tutorial includes it but it seems like we could just let ourselves
     # fail normally here
-    def index_docs(self):
-        docsfi = os.path.join(BASE, 'documents', f'{self.index_name}.json')
+    def index_docs(self, documents_file=None):
+        docsfi = documents_file or os.path.join(BASE, 'documents', f'{self.index_name}.json')
         with open(docsfi) as infi:
             documents = json.load(infi)
         result = self.search_client.upload_documents(documents=documents)
         print("Upload of new {} document(s) succeeded: {}".format(len(documents), result[0].succeeded))
+        return len(documents)
 
     # TODO: this is where any preprocessing of args would take place
     def search(self, **kwargs):
         return self.search_client.search(**kwargs)
+
+    def get_document(self, key):
+        return self.search_client.get_document(key=key)
 
     def autocomplete(self, **kwargs):
         return self.search_client.autocomplete(**kwargs)
@@ -73,10 +87,10 @@ class AzureSearchClient:
                               highlight_pre_tag='<i>',
                               highlight_post_tag='</i>',
                               **kwargs):
-        highlight_fields = highlight_fields or self.index.field_names
-        return self.search_client.search(highlight_fields,
-                                         highlight_pre_tag,
-                                         highlight_post_tag,
-                                         highlight_fields,
-                                         **kwargs)
+        highlight_fields = highlight_fields or self.index.highlightable_fields
+        new_kwargs = {**kwargs,
+                      **{'highlight_fields': ','.join(highlight_fields),
+                         'highlight_pre_tag': highlight_pre_tag,
+                         'highlight_post_tag': highlight_post_tag}}
+        return self.search(**new_kwargs)
 
