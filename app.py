@@ -1,9 +1,7 @@
-from flask import Flask, redirect, render_template, request, url_for
+from flask import Flask, redirect, render_template, request, url_for, session
+from uuid import uuid1
 
 from models.azure_search_client import AzureSearchClient
-from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField
-from wtforms.validators import DataRequired
 import os
 import math
 
@@ -35,12 +33,15 @@ def search_index(index_name, term=None, page=None):
     
     if request.method == 'POST':
       new_term = request.form['term']
+      session_id = uuid1()
+      session['session_id'] = session_id
       return redirect(url_for('search_index', index_name=index_name, term=new_term, page=1))
     else:
         new_term = request.args.get('term')
-        page = request.args.get('page')
-        skip = int(page) * 10
-        search_results = client.search(search_text=new_term, top=10, skip=skip)
+        page = request.args.get('page') or 1
+        session_id = session.get('session_id') or uuid1()
+        skip = (int(page)-1) * 10
+        search_results = client.search(search_text=new_term, top=10, skip=skip, session_id=session_id)
         total_count = search_results.get_count()
         pages = math.ceil(total_count / 10)
         return render_template(
@@ -51,5 +52,5 @@ def search_index(index_name, term=None, page=None):
             search_term=new_term,
             count=total_count,
             pages=pages,
-            page=page
+            page=int(page)
     )
