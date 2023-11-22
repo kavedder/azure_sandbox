@@ -15,10 +15,6 @@ def hello_world():
     return "<p>Hello, World!</p>"
 
 
-# class BasicForm(FlaskForm):
-#     search_term = StringField("search_term", validators=[DataRequired()])
-
-
 @app.route("/search/")
 def search():
     client = AzureSearchClient()

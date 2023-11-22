@@ -1,131 +1,128 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
-
-<head>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <title>Azure AI Search Sandbox</title>
-</head>
-
-<body>
-    <h1>Available indexes:</h1>
-    {% for index in indexes %}
-
-    <a href={{ url_for('search_index', index_name=index) }}>
-        <button class="styled">{{ index }}</button>
-    </a>
-    {% endfor %}
-
-    {% if current_idx %}
-    <form action = {{ url_for('search_index', index_name=current_idx, term=search_term) }} method = "post">
-         <p>Enter search term:</p>
-         <p><input type = "text" name = "term" /></p>
-         <p><input type = "submit" value = "submit" /></p>
-    </form>
-    {% endif %}
-
-    {% if search_term %}
-    <h2>Search results for "{{ search_term }}"</h2>
-    {% endif %}
-
-    {% if pages %}
-    <p>Page {{ page }} of {{ pages }}</p>
-
-    {% if pages > 1 %}
-    {% if page >= 4 %}
-        <a href={{ url_for('search_index', index_name=current_idx, term=search_term, page=page-3)}}><div class="current-page"><<</div></a>
-        {% if page + 3 < pages %}
-            {% for p in range(page - 3, page + 4) %}
-                {% if p == page %}
-                    <div class="current-page">{{ p }}</div>
-                {% else %}
-                    <a href={{ url_for('search_index', index_name=current_idx, term=search_term, page=p) }}>
-                        <button class="styled">{{ p }}</button>
-                    </a>
-                {% endif %}
-            {% endfor %}
-            <a href={{ url_for('search_index', index_name=current_idx, term=search_term, page=page+3)}}><div class="current-page">>></div></a>
-        {% else %}
-            {% for p in range(page - 3, pages + 1) %}
-                {% if p == page %}
-                    <div class="current-page">{{ p }}</div>
-                {% else %}
-                    <a href={{ url_for('search_index', index_name=current_idx, term=search_term, page=p) }}>
-                        <button class="styled">{{ p }}</button>
-                    </a>
-                {% endif %}
-            {% endfor %}
-        {% endif %}
-    {% else %}
-        {% if page + 4 < pages %}
-            {% for p in range(1, page + 4) %}
-                {% if p == page %}
-                    <div class="current-page">{{ p }}</div>
-                {% else %}
-                    <a href={{ url_for('search_index', index_name=current_idx, term=search_term, page=p) }}>
-                        <button class="styled">{{ p }}</button>
-                    </a>
-                {% endif %}
-            {% endfor %}
-            <a href={{ url_for('search_index', index_name=current_idx, term=search_term, page=page+3)}}><div class="current-page">>></div></a>
-        {% else %}
-            {% for p in range(1, pages + 1) %}
-                {% if p == page %}
-                    <div class="current-page">{{ p }}</div>
-                {% else %}
-                    <a href={{ url_for('search_index', index_name=current_idx, term=search_term, page=p) }}>
-                        <button class="styled">{{ p }}</button>
-                    </a>
-                {% endif %}
-            {% endfor %}
-        {% endif %}
-    {% endif %}
-    {% endif %}
-
-    {% endif %}
-
-    {% if count %}
-    {% if ((page - 1) * 10) + 10 > count %}
-    <p>Showing results {{ ((page - 1) * 10) + 1 }} to {{ count }} of {{ count }}</p>
-    {% else %}
-    <p>Showing results {{ ((page - 1) * 10) + 1 }} to {{ ((page - 1) * 10) + 10 }} of {{ count }}</p>
-    {% endif %}
-    {% endif %}
-
-    {% if search_results %}
-
-    {% for res in search_results %}
-    <table>
-        <tr>
-            <th scope="col">Field</th>
-            <th scope="col">Contents</th>
-        </tr>
-        {% for k, v in res.items() %}
-        <tr>
-
-            {% if v %}
-            {% if v is string %}
-            <th scope="row">{{ k }}</th>
-            <td>
-                {% for p in v.split('\n') %}
-                <p>{{ p }}</p>
-                {% endfor %}
-            </td>
-            {% elif v is number %}
-            <th scope="row">{{ k }}</th>
-            <td>{{ v }}</td>
-            {% else %}
-            <th scope="row">{{ k }}</th>
-            <td>{{ ', '.join(v) }}</td>
-            {% endif %}
-            {% endif %}
-
-        </tr>
+    <head>
+        <link rel="stylesheet"
+              href="{{ url_for('static', filename='styles.css') }}">
+        <title>Azure AI Search Sandbox</title>
+    </head>
+    <body>
+        <h1>Available indexes:</h1>
+        {% for index in indexes %}
+            <a href={{ url_for('search_index', index_name=index) }}>
+                <button class="styled">{{ index }}</button>
+            </a>
         {% endfor %}
-
-    </table>
-    <br />
-    {% endfor %}
-    {% endif %}
-</body>
-
+        {% if current_idx %}
+            <form action = {{ url_for('search_index', index_name=current_idx, term=search_term) }} method = "post">
+                <p>Enter search term:</p>
+                <p>
+                    <input type = "text" name = "term" />
+                </p>
+                <p>
+                    <input type = "submit" value = "submit" />
+                </p>
+            </form>
+        {% endif %}
+        {% if search_term %}<h2>Search results for "{{ search_term }}"</h2>{% endif %}
+        {% if pages %}
+            <p>Page {{ page }} of {{ pages }}</p>
+            {% if pages > 1 %}
+                {% if page >= 4 %}
+                    <a href={{ url_for('search_index', index_name=current_idx, term=search_term, page=page-3) }}>
+                        <div class="current-page">
+                            <<
+                        </div>
+                    </a>
+                    {% if page + 3 < pages %}
+                        {% for p in range(page - 3, page + 4) %}
+                            {% if p == page %}
+                                <div class="current-page">{{ p }}</div>
+                            {% else %}
+                                <a href={{ url_for('search_index', index_name=current_idx, term=search_term, page=p) }}>
+                                    <button class="styled">{{ p }}</button>
+                                </a>
+                            {% endif %}
+                        {% endfor %}
+                        <a href={{ url_for('search_index', index_name=current_idx, term=search_term, page=page+3) }}>
+                            <div class="current-page">>></div>
+                        </a>
+                    {% else %}
+                        {% for p in range(page - 3, pages + 1) %}
+                            {% if p == page %}
+                                <div class="current-page">{{ p }}</div>
+                            {% else %}
+                                <a href={{ url_for('search_index', index_name=current_idx, term=search_term, page=p) }}>
+                                    <button class="styled">{{ p }}</button>
+                                </a>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                {% else %}
+                    {% if page + 4 < pages %}
+                        {% for p in range(1, page + 4) %}
+                            {% if p == page %}
+                                <div class="current-page">{{ p }}</div>
+                            {% else %}
+                                <a href={{ url_for('search_index', index_name=current_idx, term=search_term, page=p) }}>
+                                    <button class="styled">{{ p }}</button>
+                                </a>
+                            {% endif %}
+                        {% endfor %}
+                        <a href={{ url_for('search_index', index_name=current_idx, term=search_term, page=page+3) }}>
+                            <div class="current-page">>></div>
+                        </a>
+                    {% else %}
+                        {% for p in range(1, pages + 1) %}
+                            {% if p == page %}
+                                <div class="current-page">{{ p }}</div>
+                            {% else %}
+                                <a href={{ url_for('search_index', index_name=current_idx, term=search_term, page=p) }}>
+                                    <button class="styled">{{ p }}</button>
+                                </a>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                {% endif %}
+            {% endif %}
+        {% endif %}
+        {% if count %}
+            {% if ((page - 1) * 10) + 10 > count %}
+                <p>Showing results {{ ((page - 1) * 10) + 1 }} to {{ count }} of {{ count }}</p>
+            {% else %}
+                <p>Showing results {{ ((page - 1) * 10) + 1 }} to {{ ((page - 1) * 10) + 10 }} of {{ count }}</p>
+            {% endif %}
+        {% endif %}
+        {% if search_results %}
+            {% for res in search_results %}
+                <table>
+                    <tr>
+                        <th scope="col">Field</th>
+                        <th scope="col">Contents</th>
+                    </tr>
+                    {% for k, v in res.items() %}
+                        <tr>
+                            {% if v %}
+                                {% if v is string %}
+                                    <th scope="row">{{ k }}</th>
+                                    <td>
+                                        {% for p in v.split('
+                                            ') %}
+                                            <p>{{ p }}</p>
+                                        {% endfor %}
+                                    </td>
+                                {% elif v is number %}
+                                    <th scope="row">{{ k }}</th>
+                                    <td>{{ v }}</td>
+                                {% else %}
+                                    <th scope="row">{{ k }}</th>
+                                    <td>{{ ', '.join(v) }}</td>
+                                {% endif %}
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                </table>
+                <br />
+            {% endfor %}
+        {% endif %}
+    </body>
 </html>
