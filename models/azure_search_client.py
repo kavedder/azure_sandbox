@@ -19,9 +19,10 @@ class AzureSearchClient:
     Class that holds both an indexing client (build and delete indexes)
     and search client (search/autocomplete/etc).
 
-    Tied to a single index.
+    Tied to a single index, or no index at all
     """
-    def __init__(self, index_name, env='dev', index_file=None):
+
+    def __init__(self, index_name=None, env='dev', index_file=None):
         assert env in VALID_ENVS, f'{env} is not a valid env; valid envs are {VALID_ENVS}'
 
         self.index_name = index_name
@@ -32,10 +33,15 @@ class AzureSearchClient:
         self.admin_key = creds['primary_admin']
         self.endpoint = self.build_endpoint()
 
-        self.search_client = self.build_client(SearchClient)
-        self.admin_client = self.build_client(SearchIndexClient)
-
-        self.index = AzureSearchIndex(self.index_name, index_file)
+        # TODO: separate these into different models?
+        # Only some of the methods on this class work without being tied to an index
+        if self.index_name:
+            self.search_client = SearchClient(endpoint=self.endpoint,
+                                              credential=AzureKeyCredential(self.admin_key),
+                                              index_name=index_name)
+            self.index = AzureSearchIndex(self.index_name, index_file)
+        self.admin_client = SearchIndexClient(endpoint=self.endpoint,
+                                              credential=AzureKeyCredential(self.admin_key))
 
     def get_creds(self):
         with open(self.creds_file) as credsfi:
@@ -43,11 +49,6 @@ class AzureSearchClient:
 
     def build_endpoint(self):
         return f'https://{self.service_name}.search.windows.net/'
-
-    def build_client(self, client_type):
-        return client_type(endpoint=self.endpoint,
-                           index_name=self.index_name,
-                           credential=AzureKeyCredential(self.admin_key))
 
     def list_indexes(self):
         result = self.admin_client.list_index_names()
@@ -108,7 +109,7 @@ class AzureSearchClient:
                             print(traceback.print_exc())
                             exit(420)
                     success = 'success' if result[0].succeeded else 'failure'
-                    print(f'{(completed/num_docs) * 100:.1f}% done: {success}')
+                    print(f'{(completed / num_docs) * 100:.1f}% done: {success}')
                     chunk = []
                 line = infi.readline()
         os.remove(oneline)
@@ -141,4 +142,3 @@ class AzureSearchClient:
                          'highlight_pre_tag': highlight_pre_tag,
                          'highlight_post_tag': highlight_post_tag}}
         return self.search(**new_kwargs)
-

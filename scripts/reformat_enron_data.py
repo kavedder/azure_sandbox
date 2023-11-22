@@ -83,7 +83,7 @@ def parse_email(raw, username, folder, path):
             elif line.startswith('From: '):
                 doc['FromEmail'] = sub_header_line('From', line)
             elif line.startswith('To: '):
-                doc['ToEmail'] = sub_header_line('From', line, True)
+                doc['ToEmail'] = sub_header_line('To', line, True)
             # Different capitalizations of Bcc and Cc occur in emails, but not in the header
             elif line.startswith('Cc: '):
                 doc['CcEmail'] = sub_header_line('Cc', line, True)
