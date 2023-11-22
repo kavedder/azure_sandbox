@@ -136,10 +136,12 @@ class AzureSearchClient:
                               highlight_fields=None,
                               highlight_pre_tag='<i>',
                               highlight_post_tag='</i>',
+                              include_total_count=True,
                               **kwargs):
         highlight_fields = highlight_fields or self.index.highlightable_fields
         new_kwargs = {**kwargs,
                       **{'highlight_fields': ','.join(highlight_fields),
                          'highlight_pre_tag': highlight_pre_tag,
-                         'highlight_post_tag': highlight_post_tag}}
+                         'highlight_post_tag': highlight_post_tag,
+                         'include_total_count': include_total_count}}
         return self.search(**new_kwargs)
