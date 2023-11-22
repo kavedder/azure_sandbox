@@ -4,10 +4,48 @@ from uuid import uuid1
 from models.azure_search_client import AzureSearchClient
 import os
 import math
+import re
 
 app = Flask(__name__)
 SECRET_KEY = os.urandom(32)
 app.config["SECRET_KEY"] = SECRET_KEY
+
+metadata_field_sort = {
+    'enron': [
+        'Score',
+        'Username',
+        'Folder',
+        'Original Message Id',
+        'Message Id'
+    ],
+    'hotels-quickstart': [
+        'Score',
+        'Hotel Id',
+        'Last Renovation Date'
+    ]
+}
+
+field_sort = {
+    'enron': [
+        'From Email',
+        'To Email',
+        'Cc Email',
+        'Bcc Email',
+        'Send Date',
+        'Subject',
+        'Body',
+        'Thread'
+    ],
+    'hotels-quickstart': [
+        'Hotel Name',
+        'Category',
+        'Tags',
+        'Description',
+        'Description fr',
+        'Address',
+        'Rating'
+    ]
+}
 
 
 @app.route("/")
@@ -45,8 +83,22 @@ def search_index(index_name, term=None, page=None):
         # replace fields with highlights with the highlighted fields
         results = list(search_results)
         for res in results:
-            for h_field, h_text in res.get('@search.highlights', {}).items():
+            highlights = res.get('@search.highlights') or {} # the key always exists but is sometimes None
+            for h_field, h_text in highlights.items():
                 res[h_field] = h_text
+            res.pop('@search.highlights')
+            res['Score'] = res['@search.score']
+            res.pop('@search.score')
+
+            # TODO: this should be recursive
+            # some more field name mucking
+            for k in list(res.keys()):
+                v = res[k]
+                split_k = re.sub(r'([a-z])([A-Z])', r'\1 \2', k)
+                split_k = re.sub(r'([a-zA-Z])_([a-zA-Z])', r'\1 \2', split_k)
+                res[split_k] = v
+                if k != split_k:
+                    res.pop(k)
 
         total_count = search_results.get_count()
         pages = math.ceil(total_count / 10)
