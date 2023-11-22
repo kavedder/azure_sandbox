@@ -118,7 +118,8 @@ class AzureSearchClient:
         return docs_in_index
 
     # TODO: this is where any preprocessing of args would take place
-    def search(self, **kwargs):
+    def search(self, include_total_count=True, **kwargs):
+        kwargs['include_total_count'] = include_total_count
         return self.search_client.search(**kwargs)
 
     def get_document(self, key):
