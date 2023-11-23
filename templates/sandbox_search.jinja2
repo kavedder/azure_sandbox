@@ -123,9 +123,9 @@
                         </tr>
                     {% endfor %}
                 </table>
-                    <button class="collapsible">Show Metadata</button>
-                    <div class="content">
-                <table>
+                <button class="collapsible">Show Metadata</button>
+                <div class="content">
+                    <table>
                         {% for k in md_f_sort %}
                             <tr>
                                 {% if res[k] %}
@@ -149,10 +149,10 @@
                                 {% endif %}
                             </tr>
                         {% endfor %}
-
-                </table>
-                    </div>
-                <br /><br />
+                    </table>
+                </div>
+                <br />
+                <br />
             {% endfor %}
         {% endif %}
         <script>

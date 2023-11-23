@@ -6,7 +6,12 @@ Azure Cognitive (Azure AI) Search.
 ## Usage
 
 ### creds
-Requires the existence of a toplevel `creds.<env>.yml` file. Currently the only `env` is `dev` (i.e. `creds.dev.yml`)
+Requires the existence of a toplevel `creds.<env>.yml` file. Currently the only `env` is `dev` (i.e. `creds.dev.yml`) that 
+should have at least the following:
+```yml
+primary_admin: <primary-admin-key>
+service_name: <service-name>
+```
 
 ### setup
 Set up a virtual environment if you'd like (you should like).
