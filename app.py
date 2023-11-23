@@ -15,6 +15,7 @@ metadata_field_sort = {
         'Score',
         'Username',
         'Folder',
+        'Is Deleted',
         'Original Message Id',
         'Message Id'
     ],
@@ -110,5 +111,7 @@ def search_index(index_name, term=None, page=None):
             search_term=new_term,
             count=total_count,
             pages=pages,
-            page=int(page)
+            page=int(page),
+            f_sort=field_sort[index_name],
+            md_f_sort=metadata_field_sort[index_name]
     )

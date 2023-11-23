@@ -99,34 +99,77 @@
                         <th scope="col">Field</th>
                         <th scope="col">Contents</th>
                     </tr>
-                    {% for k, v in res.items() %}
+                    {% for k in f_sort %}
                         <tr>
-                            {% if v %}
+                            {% if res[k] %}
                                 <th scope="row">{{ k }}</th>
-                                {% if v is string %}
+                                {% if res[k] is string %}
                                     <td>
-                                        {% for p in v.split('
+                                        {% for p in res[k].split('
                                             ') %}
                                             <p>{{ p }}</p>
                                         {% endfor %}
                                     </td>
-                                {% elif v is number %}
-                                    <td>{{ v }}</td>
-                                {% elif v is mapping %}
+                                {% elif res[k] is number %}
+                                    <td>{{ res[k] }}</td>
+                                {% elif res[k] is mapping %}
                                     <td>
-                                        {% for k1, v1 in v.items() %}
-                                            <p>{{ k1 }}: {{ v1 }}</p>
-                                        {% endfor %}
+                                        {% for k1, v1 in res[k].items() %}<p>{{ k1 }}: {{ v1 }}</p>{% endfor %}
                                     </td>
                                 {% else %}
-                                    <td>{{ ', '.join(v) }}</td>
+                                    <td>{{ ', '.join(res[k]) }}</td>
                                 {% endif %}
                             {% endif %}
                         </tr>
                     {% endfor %}
                 </table>
-                <br />
+                    <button class="collapsible">Show Metadata</button>
+                    <div class="content">
+                <table>
+                        {% for k in md_f_sort %}
+                            <tr>
+                                {% if res[k] %}
+                                    <th scope="row">{{ k }}</th>
+                                    {% if res[k] is string %}
+                                        <td>
+                                            {% for p in res[k].split('
+                                                ') %}
+                                                <p>{{ p }}</p>
+                                            {% endfor %}
+                                        </td>
+                                    {% elif res[k] is number %}
+                                        <td>{{ res[k] }}</td>
+                                    {% elif res[k] is mapping %}
+                                        <td>
+                                            {% for k1, v1 in res[k].items() %}<p>{{ k1 }}: {{ v1 }}</p>{% endfor %}
+                                        </td>
+                                    {% else %}
+                                        <td>{{ ', '.join(res[k]) }}</td>
+                                    {% endif %}
+                                {% endif %}
+                            </tr>
+                        {% endfor %}
+
+                </table>
+                    </div>
+                <br /><br />
             {% endfor %}
         {% endif %}
+        <script>
+var coll = document.getElementsByClassName("collapsible");
+var i;
+
+for (i = 0; i < coll.length; i++) {
+  coll[i].addEventListener("click", function() {
+    this.classList.toggle("active");
+    var content = this.nextElementSibling;
+    if (content.style.display === "block") {
+      content.style.display = "none";
+    } else {
+      content.style.display = "block";
+    }
+  });
+}
+        </script>
     </body>
 </html>
