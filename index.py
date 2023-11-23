@@ -1,5 +1,6 @@
 import argparse
 import os
+import sys
 
 from models.azure_search_client import AzureSearchClient
 
@@ -9,6 +10,7 @@ class ArgParser:
         self.parser = argparse.ArgumentParser(
             prog='index',
             description='Add documents to an index',
+            formatter_class=argparse.ArgumentDefaultsHelpFormatter
         )
         self.parser.add_argument('-i', '--index', help='Name of index', required=True)
         self.parser.add_argument('-d', '--docs', help='Path to JSON file containing documents'
@@ -17,6 +19,10 @@ class ArgParser:
                                                         '(defaults to ../indexes/<index>.json)')
         self.parser.add_argument('-r', '--reindex', help='If specified, delete the index and recreate it',
                                  action='store_true')
+        self.parser.add_argument('-c', '--chunk_size', default=10000, type=int, help='Chunk of documents to '
+                                                                                     'upload at a time')
+        self.parser.add_argument('-l', '--limit', default=sys.maxsize, type=int, help='Number of documents '
+                                                                                      'to upload total')
 
     def parse(self):
         return self.parser.parse_args()
@@ -38,10 +44,8 @@ if __name__ == '__main__':
             client.delete_index()
             client.create_index()
 
-    # if we don't chunk up the indexing, we fail with a completely unhelpful error message
-    # this may be related to the fact that we have limited storage on the free tier, and actually
-    # nothing to do with chunking?
+    # Can't upload all documents at once
     # NOTE: if get an out-of-storage message, and delete/recreate the index, wait a bit before trying
     # to index documents again for the dust to settle
-    client.index_docs_chunked(args.docs, chunk_size=10000)
+    client.index_docs_chunked(args.docs, chunk_size=args.chunk_size, limit=args.limit)
 

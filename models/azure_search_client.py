@@ -67,10 +67,10 @@ class AzureSearchClient:
 
     # TODO: does this need error handling? The tutorial includes it but it seems like we could just let ourselves
     # fail normally here
-    def index_docs(self, documents_file=None):
+    def index_docs(self, documents_file=None, limit=100000):
         docsfi = documents_file or os.path.join(BASE, 'documents', f'{self.index_name}.json')
         with open(docsfi) as infi:
-            documents = json.load(infi)
+            documents = json.load(infi)[:limit]
         print(f'Uploading {len(documents)} documents...')
         result = self.search_client.upload_documents(documents=documents)
         print(f'Upload of new {len(documents)} document(s) succeeded: {result[0].succeeded}')
@@ -78,41 +78,31 @@ class AzureSearchClient:
         print(f'{docs_in_index} now exist in index {self.index_name}')
         return len(documents)
 
-    def index_docs_chunked(self, documents_file=None, chunk_size=100):
+    def index_docs_chunked(self, documents_file=None, chunk_size=100, limit=100000):
         docsfi = documents_file or os.path.join(BASE, 'documents', f'{self.index_name}.json')
-        oneline = docsfi.replace('.json', '.oneline')
         with open(docsfi) as infi:
-            documents = json.load(infi)
+            documents = json.load(infi)[:limit]
             num_docs = len(documents)
-        print(f'Rewriting {num_docs} documents into one-object-per-line in {oneline}')
-        with open(oneline, 'w') as outfi:
-            for doc in documents:
-                outfi.write(json.dumps(doc) + '\n')
-        del documents
-        print(f'Uploading {num_docs} documents in chunks of {chunk_size}...')
-        with open(oneline) as infi:
-            chunk = []
-            completed = 0
-            line = infi.readline()
-            while line:
-                j = json.loads(line)
-                chunk.append(j)
-                if len(chunk) > chunk_size - 1:
-                    completed += chunk_size
-                    try:
-                        result = self.search_client.upload_documents(documents=chunk)
-                    except HttpResponseError as e:
-                        if "Storage quota has been exceeded for this service" in e.message:
-                            print(e.message)
-                            break
-                        else:
-                            print(traceback.print_exc())
-                            exit(420)
+            x = completed = 0
+            y = chunk_size
+            print(f'Preparing to upload {num_docs} documents to index {self.index_name} in chunks of {chunk_size}')
+            while y < num_docs:
+                try:
+                    result = self.search_client.upload_documents(documents=documents[x:y])
                     success = 'success' if result[0].succeeded else 'failure'
+                    completed += chunk_size
+                    x += chunk_size
+                    y += chunk_size
                     print(f'{(completed / num_docs) * 100:.1f}% done: {success}')
-                    chunk = []
-                line = infi.readline()
-        os.remove(oneline)
+                except HttpResponseError as e:
+                    if "Storage quota has been exceeded for this service" in e.message:
+                        print(e.message)
+                        break
+                    else:
+                        print('tried to upload:')
+                        print(json.dumps(documents[x:y], indent=2, sort_keys=True))
+                        print(traceback.print_exc())
+                        exit(420)
         docs_in_index = self.get_document_count()
         print(f'{docs_in_index} now exist in index {self.index_name}')
         return docs_in_index
