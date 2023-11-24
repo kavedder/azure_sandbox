@@ -48,6 +48,11 @@ field_sort = {
     ]
 }
 
+def is_a_number(s):
+    return s.replace('.', '').replace(',', '').replace(' ', '').strip().isdigit()
+
+def is_boolean(s):
+    return s.lower() == 'true' or s.lower() == 'false'
 
 @app.route("/")
 def hello_world():
@@ -62,29 +67,53 @@ def search():
 
 
 @app.route("/search/<index_name>", methods=["POST", "GET"])
-def search_index(index_name, term=None, page=None):
+def search_index(index_name, term=None, order_by=None, order_dir=None, filter_by=None,
+                 filter_exp=None, filter_val=None, page=None):
     client = AzureSearchClient(index_name)
     existing_indexes = client.list_indexes()
-    
+
     if request.method == 'POST':
-      new_term = request.form['term']
-      session_id = uuid1()
-      session['session_id'] = session_id
-      return redirect(url_for('search_index', index_name=index_name, term=new_term, page=1))
+        term = request.form['term']
+        order_by = request.form['order_by']
+        order_dir = request.form['order_dir']
+        filter_by = request.form['filter_by']
+        filter_exp = request.form['filter_exp']
+        filter_val = request.form['filter_val']
+        session_id = uuid1()
+        session['session_id'] = session_id
+        return redirect(url_for('search_index', index_name=index_name, term=term, order_by=order_by,
+                                order_dir=order_dir, filter_by=filter_by, filter_exp=filter_exp, filter_val=filter_val,
+                                page=1))
     else:
-        new_term = request.args.get('term')
+        term = request.args.get('term')
         page = request.args.get('page') or 1
+        order_by = request.args.get('order_by')
+        order_dir = request.args.get('order_dir')
+        filter_by = request.args.get('filter_by')
+        filter_exp = request.args.get('filter_exp')
+        filter_val = request.args.get('filter_val')
         session_id = session.get('session_id') or uuid1()
-        skip = (int(page)-1) * 10
-        search_results = client.search_with_highlight(
-            search_text=new_term, top=10, skip=skip, session_id=session_id,
-            highlight_pre_tag='<mark>',
-            highlight_post_tag='</mark>')
+        skip = (int(page) - 1) * 10
+
+        kwargs = {
+            'search_text': term, 'top': 10, 'skip': skip, 'session_id': session_id,
+            'highlight_pre_tag': '<mark>',
+            'highlight_post_tag': '</mark>'
+        }
+        if order_by and order_dir:
+            kwargs['order_by'] = f'{order_by} {order_dir}'
+        if filter_by and filter_exp and filter_val:
+            if not is_a_number(filter_val) and not is_boolean(filter_val):
+                filter_val = f"'{filter_val}'"
+            kwargs['filter'] = f'{filter_by} {filter_exp} {filter_val}'
+
+        print(kwargs)
+        search_results = client.search_with_highlight(**kwargs)
 
         # replace fields with highlights with the highlighted fields
         results = list(search_results)
         for res in results:
-            highlights = res.get('@search.highlights') or {} # the key always exists but is sometimes None
+            highlights = res.get('@search.highlights') or {}  # the key always exists but is sometimes None
             for h_field, h_text in highlights.items():
                 res[h_field] = h_text
             res.pop('@search.highlights')
@@ -108,10 +137,12 @@ def search_index(index_name, term=None, page=None):
             indexes=existing_indexes,
             current_idx=index_name,
             search_results=results,
-            search_term=new_term,
+            search_term=term,
             count=total_count,
             pages=pages,
             page=int(page),
             f_sort=field_sort[index_name],
-            md_f_sort=metadata_field_sort[index_name]
-    )
+            md_f_sort=metadata_field_sort[index_name],
+            sortable_fields=[f for f, v in client.index.simplified_fields.items() if v.get('sortable')],
+            filterable_fields=[f for f, v in client.index.simplified_fields.items() if v.get('filterable')]
+        )

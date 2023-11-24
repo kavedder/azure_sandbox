@@ -27,12 +27,12 @@ DATA_TYPES = {
 }
 
 
-def build_fields(json_fields):
+def build_fields_from_json(json_fields):
     fields = []
     for field in json_fields:
         field_type_name = field['field_type']
         if field_type_name == 'ComplexField':
-            field['fields'] = build_fields(field['fields'])
+            field['fields'] = build_fields_from_json(field['fields'])
 
         field_type = FIELD_TYPES[field_type_name]
         # ComplexFields don't have a `type`
@@ -44,20 +44,18 @@ def build_fields(json_fields):
     return fields
 
 
-# only `SearchableField`s can be highlighted
-def get_field_names(json_fields, prefix='', sep='/', only_highlightable=False):
-    field_names = []
+def get_simplified_fields(json_fields, prefix='', sep='/'):
+    field_names = {}
     for f in json_fields:
         base_name = sep.join([prefix, f['name']]).strip(sep)
         if f['field_type'] == 'ComplexField':
-            subfields = get_field_names(f['fields'], base_name)
-            field_names.extend(subfields)
+            subfields = get_simplified_fields(f['fields'], base_name)
+            field_names = {**field_names, **subfields}
         else:
-            if only_highlightable:
-                if f['field_type'] == 'SearchableField':
-                    field_names.append(base_name)
-            else:
-                field_names.append(base_name)
+            field_names[base_name] = {k: f.get(k, False) for k in ['facetable', 'sortable', 'filterable']}
+            # only `SearchableField`s can be highlighted
+            if f['field_type'] == 'SearchableField':
+                field_names[base_name]['highlightable'] = True
 
     return field_names
 
@@ -75,9 +73,8 @@ class AzureSearchIndex:
         self.scoring_profiles = self.index_json['scoring_profiles'] or []
         self.suggesters = self.index_json['suggesters'] or []
 
-        self.field_names = get_field_names(self.index_json['fields'])
-        self.highlightable_fields = get_field_names(self.index_json['fields'], only_highlightable=True)
-        self.fields = build_fields(self.index_json['fields'])
+        self.simplified_fields = get_simplified_fields(self.index_json['fields'])
+        self.fields = build_fields_from_json(self.index_json['fields'])
 
         self.index = SearchIndex(
             name=self.index_name,

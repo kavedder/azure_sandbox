@@ -6,24 +6,69 @@
         <title>Azure AI Search Sandbox</title>
     </head>
     <body>
+        <!-- BEGIN show available indexes -->
         <h1>Available indexes:</h1>
         {% for index in indexes %}
             <a href={{ url_for('search_index', index_name=index) }}>
                 <button class="styled">{{ index }}</button>
             </a>
         {% endfor %}
+        <!-- END show available indexes -->
+        <!-- BEGIN user input -->
         {% if current_idx %}
-            <form action = {{ url_for('search_index', index_name=current_idx, term=search_term) }} method = "post">
+            <form action = {{ url_for('search_index', index_name=current_idx) }} method = "post">
+                <!-- BEGIN search by term -->
                 <p>Enter search term:</p>
                 <p>
-                    <input type = "text" name = "term" />
+                    <input type="text" name="term" />
                 </p>
+                <!-- END search by term -->
+                <!-- BEGIN order by -->
+                <label for="order_by">Order by:</label>
+                <select id="order_by" name="order_by">
+                    {% for f in sortable_fields %}
+                        <option value={{ f }}>{{ f }}
+                        </option>
+                    {% endfor %}
+                </select>
+                <!-- END order by -->
+                <!-- BEGIN order direction -->
+                <input type="radio" id="asc" name="order_dir" value="asc" checked="checked">
+                <label for="asc">⬆️</label>
+                <input type="radio" id="desc" name="order_dir" value="desc">
+                <label for="desc">⬇️</label>
+                <!-- END order direction -->
+                <br />
+                <!-- BEGIN filtering section -->
+                <!-- BEGIN filter_by -->
+                 <label for="filter_by">Filter by:</label>
+                <select id="filter_by" name="filter_by">
+                    {% for f in filterable_fields %}
+                        <option value={{ f }}>{{ f }}</option>
+                    {% endfor %}
+                </select>
+                <!-- END filter_by -->
+                <!-- BEGIN filter_exp -->
+                <select id="filter_exp" name="filter_exp">                   
+                    <option value="lt">Less than</option>                   
+                    <option value="gt">Greater than</option>                   
+                    <option value="eq">Equals</option>                   
+                    <option value="le">Less than or equal to</option>                   
+                    <option value="ge">Greater than or equal to</option>
+                </select>
+                <!-- END filter_exp -->
+                <!-- BEGIN filter_val -->
+                <input type="text" name="filter_val" />
+                <!-- END filter_val -->
+                <!-- END filtering section -->
                 <p>
-                    <input type = "submit" value = "submit" />
+                    <input type="submit" value="submit" />
                 </p>
+                <!-- END user input -->
             </form>
         {% endif %}
         {% if search_term %}<h2>Search results for "{{ search_term }}"</h2>{% endif %}
+        <!-- BEGIN page selector (copied again down below, keep changes in sync!) -->
         {% if pages %}
             <p>Page {{ page }} of {{ pages }}</p>
             {% if pages > 1 %}
@@ -85,6 +130,8 @@
                 {% endif %}
             {% endif %}
         {% endif %}
+        <!-- END page selector -->
+        <!-- BEGIN show count x/y of z -->
         {% if count %}
             {% if ((page - 1) * 10) + 10 > count %}
                 <p>Showing results {{ ((page - 1) * 10) + 1 }} to {{ count }} of {{ count }}</p>
@@ -92,6 +139,8 @@
                 <p>Showing results {{ ((page - 1) * 10) + 1 }} to {{ ((page - 1) * 10) + 10 }} of {{ count }}</p>
             {% endif %}
         {% endif %}
+        <!-- END show count x/y of z -->
+        <!-- BEGIN results tables -->
         {% if search_results %}
             {% for res in search_results %}
                 <table>
@@ -155,6 +204,70 @@
                 <br />
             {% endfor %}
         {% endif %}
+        <!-- END results tables -->
+        <!-- BEGIN page selector (copied from above, keep changes in sync!) -->
+        {% if pages %}
+            <p>Page {{ page }} of {{ pages }}</p>
+            {% if pages > 1 %}
+                {% if page >= 4 %}
+                    <a href={{ url_for('search_index', index_name=current_idx, term=search_term, page=page-3) }}>
+                        <div class="current-page">
+                            <<
+                        </div>
+                    </a>
+                    {% if page + 3 < pages %}
+                        {% for p in range(page - 3, page + 4) %}
+                            {% if p == page %}
+                                <div class="current-page">{{ p }}</div>
+                            {% else %}
+                                <a href={{ url_for('search_index', index_name=current_idx, term=search_term, page=p) }}>
+                                    <button class="styled">{{ p }}</button>
+                                </a>
+                            {% endif %}
+                        {% endfor %}
+                        <a href={{ url_for('search_index', index_name=current_idx, term=search_term, page=page+3) }}>
+                            <div class="current-page">>></div>
+                        </a>
+                    {% else %}
+                        {% for p in range(page - 3, pages + 1) %}
+                            {% if p == page %}
+                                <div class="current-page">{{ p }}</div>
+                            {% else %}
+                                <a href={{ url_for('search_index', index_name=current_idx, term=search_term, page=p) }}>
+                                    <button class="styled">{{ p }}</button>
+                                </a>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                {% else %}
+                    {% if page + 4 < pages %}
+                        {% for p in range(1, page + 4) %}
+                            {% if p == page %}
+                                <div class="current-page">{{ p }}</div>
+                            {% else %}
+                                <a href={{ url_for('search_index', index_name=current_idx, term=search_term, page=p) }}>
+                                    <button class="styled">{{ p }}</button>
+                                </a>
+                            {% endif %}
+                        {% endfor %}
+                        <a href={{ url_for('search_index', index_name=current_idx, term=search_term, page=page+3) }}>
+                            <div class="current-page">>></div>
+                        </a>
+                    {% else %}
+                        {% for p in range(1, pages + 1) %}
+                            {% if p == page %}
+                                <div class="current-page">{{ p }}</div>
+                            {% else %}
+                                <a href={{ url_for('search_index', index_name=current_idx, term=search_term, page=p) }}>
+                                    <button class="styled">{{ p }}</button>
+                                </a>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                {% endif %}
+            {% endif %}
+        {% endif %}
+        <!-- END page selector -->
         <script>
 var coll = document.getElementsByClassName("collapsible");
 var i;
