@@ -1,0 +1,22 @@
+BUGZ?
+------------
+- some senddates are showing up as eg. 0001-05-30T21:10:06Z
+    - 415762.1075852658314.JavaMail.evans@thyme
+- or 2044-01-04T22:48:58Z
+    - 21511287.1075842027020.JavaMail.evans@thyme
+
+UPGRAYEDDS
+------------
+- persist choices in UI
+- if fields selected in filter/sort/search/facet, show (not under metadata expand)
+- "show" vs "hide" metadata switch
+- make filters better (current is just POC)
+
+
+MORE OPTIONS
+------------
+x filtering
+x sorting
+    x asc/desc
+- faceting
+- only search selected fields
