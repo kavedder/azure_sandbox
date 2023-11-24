@@ -30,7 +30,6 @@
       "field_type": "SimpleField",
       "name": "SendDate",
       "type": "datetime_offset",
-      "facetable": true,
       "filterable": true,
       "sortable": true
     },
@@ -62,25 +61,19 @@
       "field_type": "SearchableField",
       "name": "ToEmail",
       "type": "string",
-      "collection": true,
-      "facetable": true,
-      "filterable": true
+      "collection": true
     },
     {
       "field_type": "SearchableField",
       "name": "CcEmail",
       "type": "string",
-      "collection": true,
-      "facetable": true,
-      "filterable": true
+      "collection": true
     },
     {
       "field_type": "SearchableField",
       "name": "BccEmail",
       "type": "string",
-      "collection": true,
-      "facetable": true,
-      "filterable": true
+      "collection": true
     },
     {
       "field_type": "SearchableField",
