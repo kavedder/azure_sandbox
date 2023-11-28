@@ -1,9 +1,11 @@
 BUGZ?
 ------------
 - some senddates are showing up as eg. 0001-05-30T21:10:06Z
+    - Date: Fri, 26 Aug 0001 22:16:36 -0800 (PST)
     - 415762.1075852658314.JavaMail.evans@thyme
 - or 2044-01-04T22:48:58Z
     - 21511287.1075842027020.JavaMail.evans@thyme
+    - Date: Mon, 4 Jan 2044 14:48:58 -0800 (PST)
 
 UPGRAYEDDS
 ------------
