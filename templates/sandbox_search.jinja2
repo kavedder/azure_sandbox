@@ -4,6 +4,9 @@
         <link rel="stylesheet"
               href="{{ url_for('static', filename='styles.css') }}">
         <title>Azure AI Search Sandbox</title>
+        <link rel="icon"
+              type="image/x-icon"
+              href="{{ url_for('static', filename='favicon.png') }}" />
     </head>
     <body>
         <!-- BEGIN show available indexes -->
@@ -26,6 +29,7 @@
                 <!-- BEGIN order by -->
                 <label for="order_by">Order by:</label>
                 <select id="order_by" name="order_by">
+                    <option value="" />
                     {% for f in sortable_fields %}
                         <option value={{ f }}>{{ f }}
                         </option>
@@ -33,33 +37,102 @@
                 </select>
                 <!-- END order by -->
                 <!-- BEGIN order direction -->
-                <input type="radio" id="asc" name="order_dir" value="asc" checked="checked">
+                <input type="radio" id="asc" name="order_dir" value="asc">
                 <label for="asc">⬆️</label>
                 <input type="radio" id="desc" name="order_dir" value="desc">
                 <label for="desc">⬇️</label>
                 <!-- END order direction -->
                 <br />
                 <!-- BEGIN filtering section -->
-                <!-- BEGIN filter_by -->
-                 <label for="filter_by">Filter by:</label>
-                <select id="filter_by" name="filter_by">
-                    {% for f in filterable_fields %}
-                        <option value={{ f }}>{{ f }}</option>
-                    {% endfor %}
-                </select>
-                <!-- END filter_by -->
-                <!-- BEGIN filter_exp -->
-                <select id="filter_exp" name="filter_exp">                   
-                    <option value="lt">Less than</option>                   
-                    <option value="gt">Greater than</option>                   
-                    <option value="eq">Equals</option>                   
-                    <option value="le">Less than or equal to</option>                   
-                    <option value="ge">Greater than or equal to</option>
-                </select>
-                <!-- END filter_exp -->
-                <!-- BEGIN filter_val -->
-                <input type="text" name="filter_val" />
-                <!-- END filter_val -->
+                <!-- BEGIN number filtering -->
+                {% if numeric_filterable_fields %}
+                    <!-- BEGIN filter_by -->
+                    <label for="numeric_filter_by">Filter by numeric field:</label>
+                    <select id="numeric_filter_by" name="numeric_filter_by">
+                        <option value="" />
+                        {% for f in numeric_filterable_fields %}
+                            <option value={{ f }}>{{ f }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <!-- END filter_by -->
+                    <!-- BEGIN filter_exp -->
+                    <select id="numeric_filter_exp" name="numeric_filter_exp">{% include 'comparison_filters.jinja2' %}</select>
+                    <!-- END filter_exp -->
+                    <!-- BEGIN filter_val -->
+                    <input type="number" name="numeric_filter_val" />
+                    <!-- END filter_val -->
+                    <br />
+                {% endif %}
+                <!-- END number filtering -->
+                <!-- BEGIN datetime filtering -->
+                {% if datetime_filterable_fields %}
+                    <!-- BEGIN filter_by -->
+                    <label for="datetime_filter_by">Filter by date/time field:</label>
+                    <select id="datetime_filter_by" name="datetime_filter_by">
+                        <option value="" />
+                        {% for f in datetime_filterable_fields %}
+                            <option value={{ f }}>{{ f }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <!-- END filter_by -->
+                    <!-- BEGIN filter_exp -->
+                    <select id="datetime_filter_exp" name="datetime_filter_exp">{% include 'comparison_filters.jinja2' %}</select>
+                    <!-- END filter_exp -->
+                    <!-- BEGIN filter_val -->
+                    <!-- TODO: insert datetime selector -->
+                    <input type="text" name="datetime_filter_val" />
+                    <!-- END filter_val -->
+                    <br />
+                {% endif %}
+                <!-- END datetime filtering -->
+                <!-- BEGIN string filtering -->
+                {% if string_filterable_fields %}
+                    <!-- BEGIN filter_by -->
+                    <label for="string_filter_by">Filter by text field:</label>
+                    <select id="string_filter_by" name="string_filter_by">
+                        <option value="" />
+                        {% for f in string_filterable_fields %}
+                            <option value={{ f }}>{{ f }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <!-- END filter_by -->
+                    <!-- BEGIN filter_exp -->
+                    is
+                    <!-- END filter_exp -->
+                    <!-- BEGIN filter_val -->
+                    <input type="text" name="string_filter_val" />
+                    <!-- END filter_val -->
+                    <br />
+                {% endif %}
+                <!-- END string filtering -->
+                <!-- BEGIN boolean filtering -->
+                {% if boolean_filterable_fields %}
+                    <!-- BEGIN filter_by -->
+                    <label for="boolean_filter_by">Filter by boolean field:</label>
+                    <select id="boolean_filter_by" name="boolean_filter_by">
+                        <option value="" />
+                        {% for f in boolean_filterable_fields %}
+                            <option value={{ f }}>{{ f }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <!-- END filter_by -->
+                    <!-- BEGIN filter_exp -->
+                    is
+                    <!-- END filter_exp -->
+                    <!-- BEGIN filter_val -->
+                    <select id="boolean_filter_val" name="boolean_filter_val">
+                        <option value="" />
+                        <option value="true">True</option>
+                        <option value="false">False</option>
+                    </select>
+                    <!-- END filter_val -->
+                    <br />
+                {% endif %}
+                <!-- END boolean filtering -->
                 <!-- END filtering section -->
                 <p>
                     <input type="submit" value="submit" />
@@ -68,67 +141,9 @@
             </form>
         {% endif %}
         {% if search_term %}<h2>Search results for "{{ search_term }}"</h2>{% endif %}
-        <!-- BEGIN page selector (copied again down below, keep changes in sync!) -->
+        <!-- BEGIN page selector -->
         {% if pages %}
-            <p>Page {{ page }} of {{ pages }}</p>
-            {% if pages > 1 %}
-                {% if page >= 4 %}
-                    <a href={{ url_for('search_index', index_name=current_idx, term=search_term, page=page-3) }}>
-                        <div class="current-page">
-                            <<
-                        </div>
-                    </a>
-                    {% if page + 3 < pages %}
-                        {% for p in range(page - 3, page + 4) %}
-                            {% if p == page %}
-                                <div class="current-page">{{ p }}</div>
-                            {% else %}
-                                <a href={{ url_for('search_index', index_name=current_idx, term=search_term, page=p) }}>
-                                    <button class="styled">{{ p }}</button>
-                                </a>
-                            {% endif %}
-                        {% endfor %}
-                        <a href={{ url_for('search_index', index_name=current_idx, term=search_term, page=page+3) }}>
-                            <div class="current-page">>></div>
-                        </a>
-                    {% else %}
-                        {% for p in range(page - 3, pages + 1) %}
-                            {% if p == page %}
-                                <div class="current-page">{{ p }}</div>
-                            {% else %}
-                                <a href={{ url_for('search_index', index_name=current_idx, term=search_term, page=p) }}>
-                                    <button class="styled">{{ p }}</button>
-                                </a>
-                            {% endif %}
-                        {% endfor %}
-                    {% endif %}
-                {% else %}
-                    {% if page + 4 < pages %}
-                        {% for p in range(1, page + 4) %}
-                            {% if p == page %}
-                                <div class="current-page">{{ p }}</div>
-                            {% else %}
-                                <a href={{ url_for('search_index', index_name=current_idx, term=search_term, page=p) }}>
-                                    <button class="styled">{{ p }}</button>
-                                </a>
-                            {% endif %}
-                        {% endfor %}
-                        <a href={{ url_for('search_index', index_name=current_idx, term=search_term, page=page+3) }}>
-                            <div class="current-page">>></div>
-                        </a>
-                    {% else %}
-                        {% for p in range(1, pages + 1) %}
-                            {% if p == page %}
-                                <div class="current-page">{{ p }}</div>
-                            {% else %}
-                                <a href={{ url_for('search_index', index_name=current_idx, term=search_term, page=p) }}>
-                                    <button class="styled">{{ p }}</button>
-                                </a>
-                            {% endif %}
-                        {% endfor %}
-                    {% endif %}
-                {% endif %}
-            {% endif %}
+            {% include 'page_selector.jinja2' %}
         {% endif %}
         <!-- END page selector -->
         <!-- BEGIN show count x/y of z -->
@@ -142,130 +157,12 @@
         <!-- END show count x/y of z -->
         <!-- BEGIN results tables -->
         {% if search_results %}
-            {% for res in search_results %}
-                <table>
-                    <tr>
-                        <th scope="col">Field</th>
-                        <th scope="col">Contents</th>
-                    </tr>
-                    {% for k in f_sort %}
-                        <tr>
-                            {% if res[k] %}
-                                <th scope="row">{{ k }}</th>
-                                {% if res[k] is string %}
-                                    <td>
-                                        {% for p in res[k].split('
-                                            ') %}
-                                            <p>{{ p }}</p>
-                                        {% endfor %}
-                                    </td>
-                                {% elif res[k] is number %}
-                                    <td>{{ res[k] }}</td>
-                                {% elif res[k] is mapping %}
-                                    <td>
-                                        {% for k1, v1 in res[k].items() %}<p>{{ k1 }}: {{ v1 }}</p>{% endfor %}
-                                    </td>
-                                {% else %}
-                                    <td>{{ ', '.join(res[k]) }}</td>
-                                {% endif %}
-                            {% endif %}
-                        </tr>
-                    {% endfor %}
-                </table>
-                <button class="collapsible">Show Metadata</button>
-                <div class="content">
-                    <table>
-                        {% for k in md_f_sort %}
-                            <tr>
-                                {% if res[k] %}
-                                    <th scope="row">{{ k }}</th>
-                                    {% if res[k] is string %}
-                                        <td>
-                                            {% for p in res[k].split('
-                                                ') %}
-                                                <p>{{ p }}</p>
-                                            {% endfor %}
-                                        </td>
-                                    {% elif res[k] is number %}
-                                        <td>{{ res[k] }}</td>
-                                    {% elif res[k] is mapping %}
-                                        <td>
-                                            {% for k1, v1 in res[k].items() %}<p>{{ k1 }}: {{ v1 }}</p>{% endfor %}
-                                        </td>
-                                    {% else %}
-                                        <td>{{ ', '.join(res[k]) }}</td>
-                                    {% endif %}
-                                {% endif %}
-                            </tr>
-                        {% endfor %}
-                    </table>
-                </div>
-                <br />
-                <br />
-            {% endfor %}
+            {% include 'results.jinja2' %}
         {% endif %}
         <!-- END results tables -->
-        <!-- BEGIN page selector (copied from above, keep changes in sync!) -->
+        <!-- BEGIN page selector -->
         {% if pages %}
-            <p>Page {{ page }} of {{ pages }}</p>
-            {% if pages > 1 %}
-                {% if page >= 4 %}
-                    <a href={{ url_for('search_index', index_name=current_idx, term=search_term, page=page-3) }}>
-                        <div class="current-page">
-                            <<
-                        </div>
-                    </a>
-                    {% if page + 3 < pages %}
-                        {% for p in range(page - 3, page + 4) %}
-                            {% if p == page %}
-                                <div class="current-page">{{ p }}</div>
-                            {% else %}
-                                <a href={{ url_for('search_index', index_name=current_idx, term=search_term, page=p) }}>
-                                    <button class="styled">{{ p }}</button>
-                                </a>
-                            {% endif %}
-                        {% endfor %}
-                        <a href={{ url_for('search_index', index_name=current_idx, term=search_term, page=page+3) }}>
-                            <div class="current-page">>></div>
-                        </a>
-                    {% else %}
-                        {% for p in range(page - 3, pages + 1) %}
-                            {% if p == page %}
-                                <div class="current-page">{{ p }}</div>
-                            {% else %}
-                                <a href={{ url_for('search_index', index_name=current_idx, term=search_term, page=p) }}>
-                                    <button class="styled">{{ p }}</button>
-                                </a>
-                            {% endif %}
-                        {% endfor %}
-                    {% endif %}
-                {% else %}
-                    {% if page + 4 < pages %}
-                        {% for p in range(1, page + 4) %}
-                            {% if p == page %}
-                                <div class="current-page">{{ p }}</div>
-                            {% else %}
-                                <a href={{ url_for('search_index', index_name=current_idx, term=search_term, page=p) }}>
-                                    <button class="styled">{{ p }}</button>
-                                </a>
-                            {% endif %}
-                        {% endfor %}
-                        <a href={{ url_for('search_index', index_name=current_idx, term=search_term, page=page+3) }}>
-                            <div class="current-page">>></div>
-                        </a>
-                    {% else %}
-                        {% for p in range(1, pages + 1) %}
-                            {% if p == page %}
-                                <div class="current-page">{{ p }}</div>
-                            {% else %}
-                                <a href={{ url_for('search_index', index_name=current_idx, term=search_term, page=p) }}>
-                                    <button class="styled">{{ p }}</button>
-                                </a>
-                            {% endif %}
-                        {% endfor %}
-                    {% endif %}
-                {% endif %}
-            {% endif %}
+            {% include 'page_selector.jinja2' %}
         {% endif %}
         <!-- END page selector -->
         <script>

@@ -1,0 +1,21 @@
+{% for res in search_results %}
+    <table>
+        <tr>
+            <th scope="col">Field</th>
+            <th scope="col">Contents</th>
+        </tr>
+        {% for k in f_sort %}
+            {% include 'result.jinja2' %}
+        {% endfor %}
+    </table>
+    <button class="collapsible">Show Metadata</button>
+    <div class="content">
+        <table>
+            {% for k in md_f_sort %}
+                {% include 'result.jinja2' %}
+            {% endfor %}
+        </table>
+    </div>
+    <br />
+    <br />
+{% endfor %}

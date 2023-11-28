@@ -48,11 +48,14 @@ field_sort = {
     ]
 }
 
+
 def is_a_number(s):
     return s.replace('.', '').replace(',', '').replace(' ', '').strip().isdigit()
 
+
 def is_boolean(s):
     return s.lower() == 'true' or s.lower() == 'false'
+
 
 @app.route("/")
 def hello_world():
@@ -67,8 +70,8 @@ def search():
 
 
 @app.route("/search/<index_name>", methods=["POST", "GET"])
-def search_index(index_name, term=None, order_by=None, order_dir=None, filter_by=None,
-                 filter_exp=None, filter_val=None, page=None):
+def search_index(index_name, term=None, order_by=None, order_dir=None, boolean_filter_by=None,
+                 boolean_filter_exp=None, boolean_filter_val=None, page=None):
     client = AzureSearchClient(index_name)
     existing_indexes = client.list_indexes()
 
@@ -76,22 +79,23 @@ def search_index(index_name, term=None, order_by=None, order_dir=None, filter_by
         term = request.form['term']
         order_by = request.form['order_by']
         order_dir = request.form['order_dir']
-        filter_by = request.form['filter_by']
-        filter_exp = request.form['filter_exp']
-        filter_val = request.form['filter_val']
+        boolean_filter_by = request.form['boolean_filter_by']
+        boolean_filter_exp = 'eq' # request.form['boolean_filter_exp']
+        boolean_filter_val = request.form['boolean_filter_val']
         session_id = uuid1()
         session['session_id'] = session_id
         return redirect(url_for('search_index', index_name=index_name, term=term, order_by=order_by,
-                                order_dir=order_dir, filter_by=filter_by, filter_exp=filter_exp, filter_val=filter_val,
+                                order_dir=order_dir, boolean_filter_by=boolean_filter_by, 
+                                boolean_filter_exp=boolean_filter_exp, boolean_filter_val=boolean_filter_val,
                                 page=1))
     else:
         term = request.args.get('term')
         page = request.args.get('page') or 1
         order_by = request.args.get('order_by')
         order_dir = request.args.get('order_dir')
-        filter_by = request.args.get('filter_by')
-        filter_exp = request.args.get('filter_exp')
-        filter_val = request.args.get('filter_val')
+        boolean_filter_by = request.args.get('boolean_filter_by')
+        boolean_filter_exp = 'eq' # request.args.get('boolean_filter_exp')
+        boolean_filter_val = request.args.get('boolean_filter_val')
         session_id = session.get('session_id') or uuid1()
         skip = (int(page) - 1) * 10
 
@@ -102,10 +106,10 @@ def search_index(index_name, term=None, order_by=None, order_dir=None, filter_by
         }
         if order_by and order_dir:
             kwargs['order_by'] = f'{order_by} {order_dir}'
-        if filter_by and filter_exp and filter_val:
-            if not is_a_number(filter_val) and not is_boolean(filter_val):
-                filter_val = f"'{filter_val}'"
-            kwargs['filter'] = f'{filter_by} {filter_exp} {filter_val}'
+        if boolean_filter_by and boolean_filter_exp and boolean_filter_val:
+            # if not is_a_number(boolean_filter_val) and not is_boolean(boolean_filter_val):
+            #     boolean_filter_val = f"'{boolean_filter_val}'"
+            kwargs['filter'] = f'{boolean_filter_by} {boolean_filter_exp} {boolean_filter_val}'
 
         print(kwargs)
         search_results = client.search_with_highlight(**kwargs)
@@ -122,6 +126,7 @@ def search_index(index_name, term=None, order_by=None, order_dir=None, filter_by
 
             # TODO: this should be recursive
             # some more field name mucking
+            # maybe store this in an explicit dict or something, but this works for cases we have now
             for k in list(res.keys()):
                 v = res[k]
                 split_k = re.sub(r'([a-z])([A-Z])', r'\1 \2', k)
@@ -129,6 +134,9 @@ def search_index(index_name, term=None, order_by=None, order_dir=None, filter_by
                 res[split_k] = v
                 if k != split_k:
                     res.pop(k)
+
+        #print([set(client.index.get_fields_by_datatype(dt) for dt in ['int32', 'int64', 'double', 'single'])])
+        numeric_fields = set.union(*[set(client.index.get_fields_by_datatype(dt)) for dt in ['int32', 'int64', 'double', 'single']])
 
         total_count = search_results.get_count()
         pages = math.ceil(total_count / 10)
@@ -143,6 +151,13 @@ def search_index(index_name, term=None, order_by=None, order_dir=None, filter_by
             page=int(page),
             f_sort=field_sort[index_name],
             md_f_sort=metadata_field_sort[index_name],
-            sortable_fields=[f for f, v in client.index.simplified_fields.items() if v.get('sortable')],
-            filterable_fields=[f for f, v in client.index.simplified_fields.items() if v.get('filterable')]
+            sortable_fields=client.index.get_fields_by_ability('sortable'),
+            boolean_filterable_fields=set(client.index.get_fields_by_ability('filterable')
+                                          ).intersection(set(client.index.get_fields_by_datatype('boolean'))),
+            date_filterable_fields=set(client.index.get_fields_by_ability('filterable')
+                                          ).intersection(set(client.index.get_fields_by_datatype('datetime_offset'))),
+            string_filterable_fields=set(client.index.get_fields_by_ability('filterable')
+                                          ).intersection(set(client.index.get_fields_by_datatype('string'))),
+            numeric_filterable_fields=set(client.index.get_fields_by_ability('filterable')
+                                          ).intersection(numeric_fields)
         )

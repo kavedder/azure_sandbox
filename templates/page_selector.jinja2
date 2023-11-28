@@ -1,0 +1,35 @@
+<p>Page {{ page }} of {{ pages }}</p>
+{% if pages > 1 %}
+    {% if page >= 4 %}
+        <a href={{ url_for('search_index', index_name=current_idx, term=search_term, page=page-3) }}>
+            <div class="current-page">
+                <<
+            </div>
+        </a>
+        {% if page + 3 < pages %}
+            {% for p in range(page - 3, page + 4) %}
+                {% include 'page_button.jinja2' %}
+            {% endfor %}
+            <a href={{ url_for('search_index', index_name=current_idx, term=search_term, page=page+3) }}>
+                <div class="current-page">>></div>
+            </a>
+        {% else %}
+            {% for p in range(page - 3, pages + 1) %}
+                {% include 'page_button.jinja2' %}
+            {% endfor %}
+        {% endif %}
+    {% else %}
+        {% if page + 4 < pages %}
+            {% for p in range(1, page + 4) %}
+                {% include 'page_button.jinja2' %}
+            {% endfor %}
+            <a href={{ url_for('search_index', index_name=current_idx, term=search_term, page=page+3) }}>
+                <div class="current-page">>></div>
+            </a>
+        {% else %}
+            {% for p in range(1, pages + 1) %}
+                {% include 'page_button.jinja2' %}
+            {% endfor %}
+        {% endif %}
+    {% endif %}
+{% endif %}

@@ -1,0 +1,21 @@
+<tr>
+    {% if res[k] %}
+        <th scope="row">{{ k }}</th>
+        {% if res[k] is string %}
+            <td>
+                {% for p in res[k].split('
+                    ') %}
+                    <p>{{ p }}</p>
+                {% endfor %}
+            </td>
+        {% elif res[k] is number %}
+            <td>{{ res[k] }}</td>
+        {% elif res[k] is mapping %}
+            <td>
+                {% for k1, v1 in res[k].items() %}<p>{{ k1 }}: {{ v1 }}</p>{% endfor %}
+            </td>
+        {% else %}
+            <td>{{ ', '.join(res[k]) }}</td>
+        {% endif %}
+    {% endif %}
+</tr>

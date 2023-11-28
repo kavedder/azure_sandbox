@@ -35,6 +35,7 @@ class AzureSearchClient:
 
         # TODO: separate these into different models?
         # Only some of the methods on this class work without being tied to an index
+        self.index = self.search_client = None
         if self.index_name:
             self.search_client = SearchClient(endpoint=self.endpoint,
                                               credential=AzureKeyCredential(self.admin_key),

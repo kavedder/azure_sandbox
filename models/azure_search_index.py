@@ -15,7 +15,7 @@ BASE = os.path.dirname(os.path.join('..', os.path.dirname(os.path.realpath(__fil
 FIELD_TYPES = {
     "SimpleField": SimpleField,
     "SearchableField": SearchableField,
-    "ComplexField": ComplexField
+    "ComplexField": ComplexField,
 }
 
 # TODO add more of these
@@ -23,7 +23,11 @@ DATA_TYPES = {
     "string": SearchFieldDataType.String,
     "double": SearchFieldDataType.Double,
     "datetime_offset": SearchFieldDataType.DateTimeOffset,
-    "boolean": SearchFieldDataType.Boolean
+    "boolean": SearchFieldDataType.Boolean,
+    "geography_point": SearchFieldDataType.GeographyPoint,  # A geographic point type.
+    "int32": SearchFieldDataType.Int32,  # An Int32 type, or something that can convert to an Int32.
+    "int64": SearchFieldDataType.Int64,  # An Int64 type, or something that can convert to an Int64.
+    "single": SearchFieldDataType.Single,  # A single type. (smaller than a double -- when would we ever use this)
 }
 
 
@@ -53,6 +57,7 @@ def get_simplified_fields(json_fields, prefix='', sep='/'):
             field_names = {**field_names, **subfields}
         else:
             field_names[base_name] = {k: f.get(k, False) for k in ['facetable', 'sortable', 'filterable']}
+            field_names[base_name]['data_type'] = f['type']
             # only `SearchableField`s can be highlighted
             if f['field_type'] == 'SearchableField':
                 field_names[base_name]['highlightable'] = True
@@ -86,3 +91,10 @@ class AzureSearchIndex:
     def build_cors_options(self):
         return CorsOptions(allowed_origins=self.index_json.get('allowed_origin') or ["*"],
                            max_age_in_seconds=self.index_json.get('max_age_in_seconds') or 60)
+
+    # NOTE only goes one level deep
+    def get_fields_by_datatype(self, datatype):
+        return [f for f, v in self.simplified_fields.items() if v['data_type'] == datatype]
+
+    def get_fields_by_ability(self, ability):
+        return [f for f, v in self.simplified_fields.items() if v.get(ability)]

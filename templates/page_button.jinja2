@@ -1,0 +1,7 @@
+{% if p == page %}
+    <div class="current-page">{{ p }}</div>
+{% else %}
+    <a href={{ url_for('search_index', index_name=current_idx, term=search_term, page=p) }}>
+        <button class="styled">{{ p }}</button>
+    </a>
+{% endif %}
