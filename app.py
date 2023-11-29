@@ -47,8 +47,9 @@ def strip_html(s):
 
 
 def apply_highlights(res, highlight_phrases=set(), highlight_fields=set()):
-    highlights = rename_keys(res.pop("@search.highlights", {}))
+    highlights = res.pop("@search.highlights", {})
     if highlights:
+        highlights = rename_keys(highlights)
         for h_field, h_text in highlights.items():
             highlight_fields.add(h_field)
             if isinstance(h_text, list):
