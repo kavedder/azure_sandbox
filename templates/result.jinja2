@@ -4,7 +4,7 @@
         {% if res[k] is string %}
             <td>
                 {% for p in res[k].split('\n') %}
-                    <p>{{ p | escape }}</p>
+                    <p>{{ p }}</p>
                 {% endfor %}
             </td>
         {% elif res[k] is number %}
