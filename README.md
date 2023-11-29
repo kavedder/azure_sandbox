@@ -20,8 +20,6 @@ pip install -r requirements.txt
 ```
 (Includes requirements for Azure APIs and other stuff, as well as Jupyter notebook)
 
-### usage
-
 NOTE: After deleting a full index, or removing docs from an index, wait for Azure to catch up to the fact
 that the index is not full if you're running up against a usage quota. It seems this can take a few minutes.
 The `index.py` script includes an optional `-w` parameter for a wait time in seconds to pause
@@ -42,8 +40,23 @@ python index.py -i enron -r
 
 ### NYT data
 
-1. Unzip `documents/nyt.json.zip`
-2. Upload data to `enron` index (run script with `-h` for more options)
+1. Unzip `documents/authors_article_text_sample.csv.bz2`
+```
+bzip2 -d -k authors_article_text_sample.csv.bz2 [-f]
+```
+2. Process data into JSON documents
+```
+python scripts/reformat_nyt_data.py -c /path/to/authors_article_text_sample.csv
+```
+3. Upload data to `nyt` index (run script with `-h` for more options)
 ```
 python index.py -i nyt -r
 ```
+
+### usage
+
+Run the frontend like
+```
+flask run --debug
+```
+and head over to `http://127.0.0.1:5000/`

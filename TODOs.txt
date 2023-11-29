@@ -7,12 +7,10 @@ BUGZ?
     - 21511287.1075842027020.JavaMail.evans@thyme
     - Date: Mon, 4 Jan 2044 14:48:58 -0800 (PST)
 
-- BIG WHOOPS! the highlighted fields shouldn't REPLACE the fields, they should be _in addition to_ -- highlights are selected sentences!
-
 UPGRAYEDDS
 ------------
 - persist choices in UI
-- if fields selected in filter/sort/search/facet, show (not under metadata expand)
+x if fields selected in filter/sort/search/facet, show (not under metadata expand)
 - "show" vs "hide" metadata switch
 - make filters better (current is just POC)
 
