@@ -13,6 +13,10 @@ primary_admin: <primary-admin-key>
 service_name: <service-name>
 ```
 
+The `service_name` is part of your Azure search service URL: `https://<service_name>.search.windows.net`
+
+You can find your `primary_admin` key under `Settings > Keys` while viewing your search service (click the `Copy to clipboard` button)
+
 ### setup
 Set up a virtual environment if you'd like (you should like).
 ```
