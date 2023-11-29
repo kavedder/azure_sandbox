@@ -1,5 +1,0 @@
-Resource group: kavedder-resources
-Location: West US 2
-Subscription: Azure subscription 1
-Subscription ID: 54c909a4-d5db-4873-9850-af0bbcff401c
-Url: https://kavedder-search-sandbox.search.windows.net
