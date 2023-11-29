@@ -57,20 +57,20 @@ def apply_highlights(res, highlight_phrases=set(), highlight_fields=set()):
                 apply_highlights(h_text, highlight_phrases, highlight_fields)
             h_phrases = set(HIGHLIGHT_RE.findall(h_text))
             highlight_phrases.update(h_phrases)
-        for field in highlights.keys():
+        for field in highlight_fields:
             for phrase in highlight_phrases:
                 if isinstance(res[field], list):
                     for i, v in enumerate(res[field]):
                         res[field][i] = strip_html(v)
                         res[field][i] = re.sub(
-                            rf"([^\w]){phrase}([^\w])",
+                            rf"([^\w]|^){phrase}([^\w]|$)",
                             rf"\1{HIGHLIGHT_PRE_TAG}{phrase}{HIGHLIGHT_POST_TAG}\2",
                             res[field][i],
                         )
                 else:
                     res[field] = strip_html(res[field])
                     res[field] = re.sub(
-                        rf"([^\w]){phrase}([^\w])",
+                        rf"([^\w]|^){phrase}([^\w]|$)",
                         rf"\1{HIGHLIGHT_PRE_TAG}{phrase}{HIGHLIGHT_POST_TAG}\2",
                         res[field],
                     )
