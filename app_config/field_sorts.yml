@@ -1,0 +1,45 @@
+field_sort:
+    enron:
+      - From Email
+      - To Email
+      - Cc Email
+      - Bcc Email
+      - Send Date
+      - Subject
+      - Body
+      - Thread
+    hotels-quickstart:
+      - Hotel Name
+      - Category
+      - Tags
+      - Description
+      - Description fr
+      - Address
+      - Rating
+    nyt:
+      - Author Full Name
+      - Headline Main
+      - Pub Date
+      - Text
+metadata_field_sort:
+    enron:
+      - Score
+      - Username
+      - Folder
+      - Is Deleted
+      - Original Message Id
+      - Message Id
+    hotels-quickstart:
+      - Score
+      - Hotel Id
+      - Last Renovation Date
+    nyt:
+      - Article Id
+      - Content Id
+      - Author Id
+      - Author Title
+      - Author First Name
+      - Author Middle Name
+      - Author Last Name
+      - Headline Kicker
+      - Print Headline

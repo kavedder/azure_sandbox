@@ -1,6 +1,7 @@
 import argparse
 import os
 import sys
+import time
 
 from models.azure_search_client import AzureSearchClient
 
@@ -23,6 +24,7 @@ class ArgParser:
                                                                                      'upload at a time')
         self.parser.add_argument('-l', '--limit', default=sys.maxsize, type=int, help='Number of documents '
                                                                                       'to upload total')
+        self.parser.add_argument('-w', '--wait', type=int, help='Time (in seconds) to wait after deleting an index before reindexing')
 
     def parse(self):
         return self.parser.parse_args()
@@ -42,6 +44,10 @@ if __name__ == '__main__':
     else:
         if args.reindex:
             client.delete_index()
+            if args.wait:
+                print(f'Waiting {args.wait} seconds before continuing...')
+                time.sleep(args.wait)
+                print('And here we go!')
             client.create_index()
 
     # Can't upload all documents at once

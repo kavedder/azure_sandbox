@@ -3,6 +3,8 @@ creds.*
 
 # too big!
 documents/enron.json
+documents/nyt.json
+documents/*.csv
 
 # osx
 .DS_Store

@@ -87,7 +87,7 @@ class AzureSearchClient:
             x = completed = 0
             y = chunk_size
             print(f'Preparing to upload {num_docs} documents to index {self.index_name} in chunks of {chunk_size}')
-            while y < num_docs:
+            while y <= num_docs:
                 try:
                     result = self.search_client.upload_documents(documents=documents[x:y])
                     success = 'success' if result[0].succeeded else 'failure'

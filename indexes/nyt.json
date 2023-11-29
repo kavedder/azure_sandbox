@@ -1,0 +1,109 @@
+{
+    "allowed_origin": [
+        "*"
+    ],
+    "max_age_in_seconds": 60,
+    "scoring_profiles": [],
+    "suggesters": [
+        {
+            "name": "sg",
+            "source_fields": [
+                "AuthorFirstName",
+                "AuthorLastName",
+                "AuthorFullName"
+            ]
+        }
+    ],
+    "fields": [
+        {
+            "field_type": "SimpleField",
+            "name": "ArticleId",
+            "type": "string",
+            "key": true
+        },
+        {
+            "field_type": "SimpleField",
+            "name": "ContentId",
+            "type": "string"
+        },
+        {
+            "field_type": "SimpleField",
+            "name": "AuthorId",
+            "type": "string"
+        },
+        {
+            "field_type": "SimpleField",
+            "name": "PubDate",
+            "type": "datetime_offset",
+            "filterable": true,
+            "sortable": true
+        },
+        {
+            "field_type": "SearchableField",
+            "name": "AuthorFullName",
+            "type": "string",
+            "sortable": true,
+            "facetable": true,
+            "filterable": true
+        },
+        {
+            "field_type": "SearchableField",
+            "name": "AuthorTitle",
+            "type": "string",
+            "sortable": true,
+            "facetable": true,
+            "filterable": true
+        },
+        {
+            "field_type": "SearchableField",
+            "name": "AuthorLastName",
+            "type": "string",
+            "sortable": true,
+            "facetable": true,
+            "filterable": true
+        },
+        {
+            "field_type": "SearchableField",
+            "name": "AuthorFirstName",
+            "type": "string",
+            "sortable": true,
+            "facetable": true,
+            "filterable": true
+        },
+        {
+            "field_type": "SearchableField",
+            "name": "AuthorMiddleName",
+            "type": "string",
+            "sortable": true,
+            "facetable": true,
+            "filterable": true
+        },
+        {
+            "field_type": "SearchableField",
+            "name": "HeadlineMain",
+            "type": "string",
+            "sortable": true,
+            "analyzer_name": "en.lucene"
+        },
+        {
+            "field_type": "SearchableField",
+            "name": "HeadlineKicker",
+            "type": "string",
+            "sortable": true,
+            "analyzer_name": "en.lucene"
+        },
+        {
+            "field_type": "SearchableField",
+            "name": "PrintHeadline",
+            "type": "string",
+            "sortable": true,
+            "analyzer_name": "en.lucene"
+        },
+        {
+            "field_type": "SearchableField",
+            "name": "Text",
+            "type": "string",
+            "analyzer_name": "en.lucene"
+        }
+    ]
+}
